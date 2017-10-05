@@ -7,6 +7,13 @@
     <string name="about">Take pictures of your furniture and we\'ll provide you with a quick estimate. To remove duplicate accounts of furniture or specify types of furniture, you can do so before getting the quick estimate.</string>
     <string name="takeImage">take images</string>
     <string name="loadTitle">Finalize List For Quick Estimate</string>
-    <string name="capture">Capture Image</string>
     <string name="catalog_fail">Failed to load</string>
+    <string name="roomchoice">RoomChoice</string>
+    <string name="bathroom">Bathroom</string>
+    <string name="bedroom">Bedroom</string>
+    <string name="kitchen">Kitchen</string>
+    <string name="livingroom">Livingroom</string>
+    <string name="takenpicture">Picture Taken Successfully</string>
+    <string name="capture">Capture</string>
+    <string name="done">Done</string>
 </resources>

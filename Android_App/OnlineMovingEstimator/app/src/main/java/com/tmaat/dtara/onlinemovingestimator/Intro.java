@@ -14,7 +14,7 @@ public class Intro extends AppCompatActivity {
     }
 
     public void onContinue(View view) {
-        Intent intent = new Intent(this, camera.class);
+        Intent intent = new Intent(this, Camera.class);
         startActivity(intent);
     }
 }

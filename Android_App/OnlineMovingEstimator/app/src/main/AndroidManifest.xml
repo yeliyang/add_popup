@@ -21,10 +21,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".camera" />
+        <activity android:name=".Camera" />
         <activity android:name=".Choose" />
         <activity android:name=".Intro" />
-        <activity android:name=".furn_catalog"></activity>
+        <activity android:name=".furn_catalog"/>
+        <activity android:name=".Pop"
+            android:theme="@style/AppTheme.CustomTheme">
+        </activity>
     </application>
 
 </manifest>

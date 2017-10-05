@@ -2,20 +2,23 @@ package com.tmaat.dtara.onlinemovingestimator;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
 import android.media.MediaRecorder;
 import android.net.Uri;
-import android.os.Environment;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Environment;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -24,21 +27,21 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class camera extends AppCompatActivity {
+public class Camera extends AppCompatActivity {
     private static final String APP_CLASS = "app";
-    private Camera mCamera;
+    private android.hardware.Camera mCamera;
     private CameraPreview mPreview;
     private MediaRecorder mMediaRecorder;
     public static final int MEDIA_TYPE_IMAGE = 1;
     public static final int MEDIA_TYPE_VIDEO = 2;
     boolean isPreviewRunning = false;
     SurfaceHolder mSurfaceHolder;
-    private Camera.PictureCallback mPicture = new Camera.PictureCallback() {
+    private android.hardware.Camera.PictureCallback mPicture = new android.hardware.Camera.PictureCallback() {
 
         public static final String TAG = "TAG";
 
         @Override
-        public void onPictureTaken(byte[] data, Camera camera) {
+        public void onPictureTaken(byte[] data, android.hardware.Camera camera) {
 
             File pictureFile = getOutputMediaFile(MEDIA_TYPE_IMAGE);
             if (pictureFile == null){
@@ -79,7 +82,7 @@ public class camera extends AppCompatActivity {
         }
 
         int result;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+        if (info.facing == android.hardware.Camera.CameraInfo.CAMERA_FACING_FRONT) {
             result = (info.orientation + degrees) % 360;
             result = (360 - result) % 360; // compensate the mirror
         } else { // back-facing
@@ -98,7 +101,7 @@ public class camera extends AppCompatActivity {
         // using Environment.getExternalStorageState() before doing this.
 
         File mediaStorageDir = new File(Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES), "MyCameraApp");
+                Environment.DIRECTORY_PICTURES), "TMaaT");
         // This location works best if you want the created images to be shared
         // between applications and persist after your app has been uninstalled.
 
@@ -128,7 +131,7 @@ public class camera extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         releaseMediaRecorder();       // if you are using MediaRecorder, release it first
-        releaseCamera();              // release the camera immediately on pause event
+        releaseCamera();              // release the Camera immediately on pause event
     }
 
     private void releaseMediaRecorder(){
@@ -136,19 +139,22 @@ public class camera extends AppCompatActivity {
             mMediaRecorder.reset();   // clear recorder configuration
             mMediaRecorder.release(); // release the recorder object
             mMediaRecorder = null;
-            mCamera.lock();           // lock camera for later use
+            mCamera.lock();           // lock Camera for later use
         }
     }
 
     private void releaseCamera(){
         if (mCamera != null){
-            mCamera.release();        // release the camera for other applications
+            mCamera.release();        // release the Camera for other applications
             mCamera = null;
         }
     }
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+        setContentView(R.layout.activity_camera);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayShowHomeEnabled(true);
+        actionBar.setIcon(R.drawable.tmatt_logo);
         // Add a listener to the Capture button
         // Create an instance of Camera
         mCamera = getCameraInstance();
@@ -158,47 +164,75 @@ public class camera extends AppCompatActivity {
         FrameLayout preview = (FrameLayout) findViewById(R.id.camera_preview);
         preview.addView(mPreview);
         Button captureButton = (Button) findViewById(R.id.button_capture);
-        captureButton.setOnClickListener(
-                new View.OnClickListener() {
+        captureButton.setOnTouchListener(
+                new View.OnTouchListener() {
                     @Override
-                    public void onClick(View v) {
-                        // get an image from the camera
-                        mCamera.takePicture(null, null, mPicture);
+                    public boolean onTouch(View v, MotionEvent event) {
+                        switch(event.getAction()) {
+                            case MotionEvent.ACTION_DOWN:
+                                // PRESSED
+                                mCamera.startPreview();
+                                mCamera.takePicture(null, null, mPicture);
+                                return true; // if you want to handle the touch event
+                            case MotionEvent.ACTION_UP:
+                                // RELEASED
+                                //mCamera.stopPreview();
+                                Toast.makeText(Camera.this,getString(R.string.takenpicture),Toast.LENGTH_SHORT).show();
+                                //SystemClock.sleep(1000);
+                                //mCamera.startPreview();
+                                Toast.makeText(Camera.this,"If you have taken all the pictures for items, you can click the Done button",Toast.LENGTH_LONG).show();
+                                return true; // if you want to handle the touch event
+                        }
+                        return false;
                     }
                 }
         );
+        Button doneButton = (Button) findViewById(R.id.done);
+        doneButton.setOnClickListener(
+                new View.OnClickListener(){
+                    @Override
+                    public void onClick(View v) {
+                        setContentView(R.layout.activity_choose);
+                    }
+                }
+        );
+        Button PopButton = (Button) findViewById(R.id.Popup);
+        PopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(Camera.this,Pop.class));
+            }
+        });
     }
-    /** Check if this device has a camera */
+    /** Check if this device has a Camera */
     private boolean checkCameraHardware(Context context) {
         if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)){
-            // this device has a camera
+            // this device has a Camera
             return true;
         } else {
-            // no camera on this device
+            // no Camera on this device
             return false;
         }
     }
     /** A safe way to get an instance of the Camera object. */
-    public static Camera getCameraInstance(){
-        Camera c = null;
+    public static android.hardware.Camera getCameraInstance(){
+        android.hardware.Camera c = null;
         try {
-            c = Camera.open(); // attempt to get a Camera instance
+            c = android.hardware.Camera.open(); // attempt to get a Camera instance
         }
         catch (Exception e){
             // Camera is not available (in use or does not exist)
         }
-        return c; // returns null if camera is unavailable
+        return c; // returns null if Camera is unavailable
     }
-
-
 
     /** A basic Camera preview class */
     public class CameraPreview extends SurfaceView implements SurfaceHolder.Callback {
         private static final String TAG ="TAG" ;
         private SurfaceHolder mHolder;
-        private Camera mCamera;
+        private android.hardware.Camera mCamera;
 
-        public CameraPreview(Context context, Camera camera) {
+        public CameraPreview(Context context, android.hardware.Camera camera) {
             super(context);
             mCamera = camera;
 
@@ -211,13 +245,13 @@ public class camera extends AppCompatActivity {
         }
 
         public void surfaceCreated(SurfaceHolder holder) {
-            // The Surface has been created, now tell the camera where to draw the preview.
+            // The Surface has been created, now tell the Camera where to draw the preview.
             try {
                 mCamera.setPreviewDisplay(holder);
                 mCamera.startPreview();
                 mCamera.setDisplayOrientation(90);
             } catch (IOException e) {
-                Log.d(TAG, "Error setting camera preview: " + e.getMessage());
+                Log.d(TAG, "Error setting Camera preview: " + e.getMessage());
             }
         }
 
@@ -250,9 +284,11 @@ public class camera extends AppCompatActivity {
                 mCamera.startPreview();
 
             } catch (Exception e){
-                Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+                Log.d(TAG, "Error starting Camera preview: " + e.getMessage());
             }
         }
 
     }
+
+
 }
